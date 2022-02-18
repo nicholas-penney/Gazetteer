@@ -1,0 +1,854 @@
+html, body {
+    height: 100%;
+    font-size: 16px;
+    overflow: hidden;
+}
+
+/* Reusable */
+
+.rel {
+    position: relative;
+}
+
+/* Loaders / Spinners */
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.spinner {
+  position: relative;
+  border: 0.25rem solid #ddd;
+  border-top: 0.25rem solid #273d47;
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+#preload-spinner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: #344556cc;
+    z-index: 95;
+}
+#preload-spinner .spinner {
+    margin-top: 3rem;
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+/* Top title bar */
+#title-bar {
+    position: fixed;
+    width: 100%;
+    padding: 1rem;
+    height: 3rem;
+    /*background-color: #333;*/
+    color: #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0F2027;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to bottom, #1a313a, #172d37, #142a30);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #1a313a, #172d37, #142a30); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    z-index: 3;
+}
+#title-bar span {
+    position: relative;
+}
+
+img.gaz-logo {
+    content: url(/images/logos/gaz-logo.png);
+    width: 25%;
+    max-width: max-content;
+    height: auto;
+    max-height: 2.75rem;
+    padding: 0;
+    margin: 0;
+    margin-right: -3rem;
+}
+
+.search-bar {
+    display: inline-block;
+    position: relative;
+}
+
+.search-bar input {
+    padding: 0 0.75rem;
+    border: 0px;
+    border-radius: 1rem;
+    color: #0e1c20;
+    width: 12rem;
+    transition: ease-in-out width 300ms;
+}
+.search-bar input:focus {
+    width: 16rem;
+}
+
+#search-icon {
+    position: absolute;
+    top: 1px;
+    right: 7px;
+    cursor: pointer;
+}
+
+#spinner-nav {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -3rem;
+}
+
+
+/* Main body */
+
+#body-container {
+    position: fixed;
+    overflow-y: visible;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: #333;
+}
+#top-null {
+    min-height: 3rem;
+}
+
+
+#spinner-page {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: #344556cc;
+    z-index: 90;
+}
+#spinner-page .spinner {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+
+/* Information bar */
+
+.abs0000,
+#body-container,
+#info-map,
+#info-col,
+#map-col {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+#info-map,
+#info-col,
+#map-col,
+#right-settings-tab {
+    top: 3rem;
+}
+
+
+#info-col {
+    position: fixed;
+    top: calc(100% - 1.5rem);
+    right: 1%;
+    bottom: 0;
+    left: 1%;
+    background-color: rgba(0, 128, 0, 0);
+    z-index: 9;
+    transition: top ease-in-out 250ms;
+}
+#info-col.menu-open {
+    top: 40%;
+    bottom: 0%;
+    z-index: 13;
+}
+
+#info-tabs-container {
+    position: relative;
+    display: block;
+    width: 98%;
+    margin: 0 auto;
+}
+
+#info-screen {
+    position: relative;
+    background-color: #f0f0f0;
+    padding: 0.5rem;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    border-radius: 0;
+    overflow-y: scroll;
+    /* Hide scrollbar for IE, Edge and Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+#info-screen::-webkit-scrollbar {
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    display: none;
+}
+
+
+#tabs-invisible-head {
+    position: absolute;
+    top: 0px;
+    right: 0;
+    left: 0;
+    height: 0;
+}
+#info-col.menu-open #tabs-invisible-head {
+    top: -30px;
+    height: 31px;
+}
+
+i.nav-link {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.25rem;
+    transition: font-size ease-in-out 250ms, padding ease-in-out 250ms;
+    font-style: normal;
+}
+ul.nav-tabs {
+    cursor: pointer;
+}
+.nav-tabs.menu-open .nav-item i.nav-link {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+}
+div.info-tabs ul.nav.nav-tabs.nav-fill .nav-item i.nav-link {
+    background-color: #dedede;
+    border-left: 1px solid #ccc;
+    border-bottom: 1px solid #dedede;
+    border-right: none;
+    color: #555;
+}
+div.info-tabs ul.nav.nav-tabs.nav-fill .nav-item i.nav-link:hover {
+    color: #142830;
+}
+div.info-tabs ul.nav.nav-tabs.nav-fill .nav-item i.nav-link.active {
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+    color: #142830;
+    font-weight: bold;
+}
+/* Disable nav if no country selected */
+ul.nav-tabs.disabled {
+    cursor: default;
+}
+div.info-tabs ul.nav.nav-tabs.nav-fill.disabled .nav-item i.nav-link,
+div.info-tabs ul.nav.nav-tabs.nav-fill.disabled .nav-item i.nav-link:hover {
+    color: #999;
+}
+
+/* Data */
+
+div.info-data {
+    padding-bottom: 2rem;
+}
+
+div.info-data > div > div {
+    background-color: #fefefe;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    color: #142830;
+    margin-bottom: 1rem;
+}
+div.info-data > div > div.loading {
+    background-color: #f5f5f5;
+    color: #345850;
+    min-height: 19rem;
+}
+
+div.info-data > div > div.loading .spinner-container {
+    justify-content: right;
+}
+
+div.info-data > div > p > div.spinner-container {
+    justify-content: right;
+}
+
+div.info-data > div > div > h5 {
+    margin-bottom: 1rem;
+    border-left: 2px solid #adb6bf;
+    padding-left: 0.5rem;
+    text-shadow: 2px 2px 2px #ddd;
+}
+
+/* Data // Wiki */
+/* #data-wiki   */
+
+/* Data // Wiki // Wiki */
+div.wiki-card img {
+    float: left;
+    margin: 0 0.5rem 0.5rem 0;
+    max-width: 100px;
+    height: 100%;
+}
+div#wiki-short-container a.wiki-link {
+    font-size: 0.875;
+}
+
+/* Data // Wiki // Top10 */
+ul#top-cities {
+    padding-left: 0.5rem;
+    list-style: none;
+    margin-bottom: 0;
+}
+
+ul#top-cities li img {
+    content: url(/images/icons/city-blue.png);
+    width: 1rem;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    margin-right: 0.25rem;
+}
+ul#top-cities li.capital img {
+    content: url(/images/icons/city-gold.png);
+}
+ul#top-cities li span {
+    margin-left: 0.25rem;
+}
+ul#top-cities li span.population {
+    font-size: 0.875rem;
+    float: right;
+}
+
+/* Data // Weather */
+/* #data-weather   */
+
+/* Data // Weather // Current / Row1 */
+.current-rows {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.current-rows hr {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+/* Row1: Summary, Wind */
+.current-summary, .current-wind {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Rows2 */
+.current-rows {
+    justify-content: space-between;
+}
+
+.current-rows table td {
+    padding: 0;
+}
+.current-rows table td:first-child, .data-key {
+    padding-right: 0.5rem;
+    font-weight: bold;
+    color: #273d47;
+    display: block;
+    padding-bottom: 0.125rem;
+}
+
+.summary-title, .wind-speed-text, .current-sun span {
+    font-weight: bold;
+    color: #273d47;
+}
+
+/* Data // Weather // Hourly & Daily */
+#data-weather div.table-scroll-container {
+    overflow-x: scroll;
+    overflow-y: visible;
+    margin-left: 4.25rem;
+}
+div.table-scroll-container table {
+    border-collapse: collapse;
+}
+div.table-scroll-container table tr td {
+    text-align: center;
+    padding-top: 0.125rem;
+    padding-right: 0.5rem;
+    padding-bottom: 0.125rem;
+    padding-left: 0.5rem;
+}
+div.table-scroll-container table tr th {
+    width: 4.25rem;
+    color: #273d47;
+    text-align: left;
+    position: absolute;
+    left: 1rem;
+    top: auto;
+}
+div.table-scroll-container table tr th:not(.temp-feels-light) {
+    font-weight: bold;
+}
+div.table-scroll-container table tr.divide-top td {
+    border-top: 1px solid #ccc;
+    padding-top: 0.25rem;
+}
+
+.temp-feels-light {
+    opacity: 0.6;
+    font-weight: normal;
+}
+
+tr .ghost-cell,
+  tr td span.ghost-units,
+  span span.ghost-units,
+  #financial-exchange-rate .ghost {
+    opacity: 0.5;
+}
+span.ghost-units-sm {
+    font-size: 0.75rem;
+}
+.ghost-6 {
+    opacity: 0.6;
+}
+
+/* Data // Weather // Daily */
+#weather-daily div.d-flex.justify-content-center {
+    max-width: min-content;
+    margin: 0 auto;
+    position: relative;
+}
+#weather-daily div.table-scroll-container {
+    margin-left: 5.25rem;
+}
+#weather-daily table tr th {
+    width: 4.25rem;
+}
+
+/* Weather icons */
+.current-summary img {
+    width: 1.75rem;
+    height: auto;
+    padding: 0;
+    margin: 0;
+}
+img.sunny {
+    content: url(/images/icons/feather/weather/sun/sun.svg);
+}
+img.cloud {
+    content: url(/images/icons/feather/weather/cloud/cloud.svg);
+    opacity: 0.7;
+}
+img.cloud-heavy {
+    opacity: 1;
+}
+img.cloud-light {
+    opacity: 0.4;
+}
+img.rain {
+    content: url(/images/icons/feather/weather/cloud/cloud-drizzle.svg);
+    opacity: 0.7;
+}
+img.rain-heavy {
+    content: url(/images/icons/feather/weather/cloud/cloud-rain.svg);
+}
+img.lightning {
+    content: url(/images/icons/feather/weather/cloud/cloud-lightning.svg);
+}
+img.snow {
+    content: url(/images/icons/feather/weather/cloud/cloud-snow.svg);
+}
+img.sunrise {
+    content: url(/images/icons/feather/weather/sun/sunrise.svg);
+    width: 1.5rem;
+}
+img.sunset {
+    content: url(/images/icons/feather/weather/sun/sunset.svg);
+    margin-top: 1.125rem;
+    width: 1.5rem;
+}
+img.wind {
+    content: url(/images/icons/feather/weather/wind.svg);
+}
+img.wind-arrow {
+    content: url(/images/icons/feather/weather/arrow-up-circle.svg);
+    margin: 0 auto;
+    display: block;
+}
+
+
+/* Data // Financial */
+/* #data-financial   */
+
+#data-financial div p {
+    margin-bottom: 0.25rem;
+}
+
+/* People */
+
+img.flagSvg {
+    height: 2rem;
+    width: auto;
+}
+
+
+/* Data Slider */
+.data-slider-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    min-height: 50px;
+    width: 100%;
+    margin-bottom: 12px;
+}
+.data-slider {
+    position: relative;
+    display: inline-block;
+    width: 250px;
+    max-width: 80%;
+    height: 50px;
+}
+
+.data-slider-line {
+    position: relative;
+    height: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 1rem;
+    z-index: 10;
+    border-radius: 5px;
+}
+.data-slider-line-ends {
+    position: absolute;
+    height: 6px;
+    width: 2px;
+    bottom: -6px;
+    z-index: 11;
+}
+.data-slider-line-start {
+    left: 0;
+}
+.data-slider-line-mean {
+    background-color: lightslategray;
+    height: 15px;
+    bottom: -2px;
+    margin-left: 1px;
+}
+.data-slider-line-end {
+    right: 0;
+}
+.data-slider-line-val {
+    height: 10px;
+    top: -10px;
+    z-index: 9;
+}
+.data-slider-line-val > svg {
+    position: relative;
+    top: -15px;
+    left: -11px;
+}
+
+.data-slider-line-ends span {
+    position: absolute;
+    font-size: 0.75rem;
+    color: lightslategray;
+    opacity: 0.9;
+    top: 2px;
+}
+.data-slider-line-start > span {
+    right: -12px;
+}
+.data-slider-line-mean > span {
+    left: -2px;
+    top: 12px;
+}
+.data-slider-line-end > span {
+    right: -8px;
+}
+
+
+/* Tab bottom for info */
+#info-tab {
+    position: fixed;
+    right: calc(50% - 2.5rem);
+    bottom: 0%;
+    left: calc(50% - 2.5rem);
+    height: 2.5rem;
+    background-color: #e0e0e0;
+    z-index: 8;
+    border-radius: 0.5rem 0.5rem 0 0;
+    transition: bottom ease-in-out 400ms;
+    border: 1px solid #ddd;
+    border-bottom: none;
+}
+#info-tab.menu-open {
+    bottom: -10%;
+}
+
+
+
+/* Settings */
+
+#settings-icon {
+    opacity: 0.6;
+}
+#settings-icon:hover {
+    opacity: 1.0;
+    cursor: pointer;
+}
+#settings-icon.active {
+    opacity: 1.0;
+}
+.settings-icon {
+    opacity: 0.8;
+    background-color: #243a40;
+}
+
+
+/* Settings dropdown */
+
+#right-settings-tab {
+    color: #dedede;
+    position: absolute;
+    /*top: 0rem;*/
+    right: 0;
+    height: 20rem;
+    width: 12rem;
+    border-top: none;
+    border-right: none;
+    border-bottom: 2px solid #1a313a;
+    border-left: 2px solid #1a313a;
+    z-index: 10;
+    display: none;
+    box-shadow: -4px 4px 16px 4px #1119;
+    background-color: #0e1c20bb;
+    box-sizing: content-box;
+    /*padding: 0.5rem;*/
+}
+#menu-buttons-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: flex-start;
+}
+#menu-buttons-container,
+#settings-tab-solid {
+    padding: 0.5rem;
+}
+#menu-buttons-container h6 {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+#menu-buttons-container label {
+    margin-left: 0.5rem;
+    margin-bottom: 0;
+}
+h5.settings-tab-solid {
+    width: 12rem;
+    height: 30px;
+    text-align: center;
+}
+
+
+/* Leaflet Map app */
+
+#map-col {
+    position: absolute;
+    top: 0rem;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+#appmap-container {
+    position: absolute;
+    top: 0rem;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+#appmap {
+    position: absolute;
+    right: 0;
+    left: 0;
+    width: 100%;
+    top: 0rem;
+    bottom: 0;
+    z-index: 1;
+    background-color: #333;
+    border-radius: 0;
+    border-left: none;
+}
+
+#appmap .leaflet-bar a, #appmap .leaflet-bar button {
+    color: #142830;
+}
+
+#darken-map {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: black;
+    opacity: 0;
+    display: block;
+    z-index: 3;
+    pointer-events: none;
+    transition: opacity ease-in-out 250ms;
+}
+#darken-map.menu-open {
+    display: block;
+    opacity: 0.25;
+    pointer-events: all;
+}
+
+#menu-open-hover-zone {
+    position: fixed;
+    top: calc(100% - 3.5rem);
+    right: 0;
+    bottom: 0;
+    left: 0;
+    opacity: 0;
+    z-index: 12;
+}
+
+#appmap div.leaflet-control-attribution {
+    margin-bottom: 1.5rem;
+}
+
+#appmap span.fa.fa-crosshairs.fa-lg {
+    vertical-align: -10%;
+}
+
+
+/* Extra narrow */
+@media only screen and (max-width: 550px) {
+    .search-bar input {
+        width: 10rem;
+    }
+    .search-bar input:focus {
+        width: 14rem;
+    }
+}
+
+
+/* Desktop */
+@media only screen and (min-width: 992px), screen and (orientation: landscape) {
+
+    #preload-spinner .spinner {
+        margin-left: 1rem;
+    }
+
+    /* Title */
+    .search-bar input {
+        width: 16rem;
+    }
+    .search-bar input:focus {
+        width: 20rem;
+    }
+
+
+    /* Info */
+    #info-col {
+        position: absolute;
+        top: 0;
+        right: calc(100% - 1rem);
+        left: -22rem;
+        bottom: 0;
+        /*overflow: hidden;*/
+        overflow-y: visible;
+        transition: right ease-in-out 250ms, left ease-in-out 250ms;
+        border-radius: 0 0.5rem 0 0;
+    }
+    #info-col.menu-open {
+        top: 0;
+        bottom: 0%;
+        left: 0;
+        right: calc(100% - 22rem);
+    }
+    #info-screen {
+        margin: 0;
+        border-radius: 0;
+    }
+    div.info-tabs ul.nav.nav-tabs.nav-fill .nav-item i.nav-link {
+        font-size: 0.825rem;
+        padding: 0.25rem 0.75rem;
+    }
+    div.info-tabs ul.nav.nav-tabs.nav-fill.menu-open .nav-item i.nav-link {
+        font-size: 0.825rem;
+        padding: 0.25rem 0.75rem;
+    }
+    #pwa-container {
+        display: none;
+    }
+
+    /* Tab left for info */
+    #info-tab {
+        position: absolute;
+        top: calc(50% - 2.5rem);
+        bottom: calc(50% - 2.5rem);
+        right: 40%;
+        left: 0;
+        height: 5rem;
+        width: 1rem;
+        background-color: #f0f0f0;
+        /* z-index: 9; */
+        border-radius: 0 0.5rem 0.5rem 0;
+        border: 1px solid #999;
+        border-left: 1px solid #f0f0f0;
+        transition: left ease-in-out 400ms;
+    }
+    #info-tab.menu-open {
+        top: calc(50% - 2.5rem);
+        bottom: calc(50% - 2.5rem);
+        left: -5%;
+    }
+
+    /* Map */
+    #map-col {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 1rem;
+        transition: left ease-in-out 250ms;
+    }
+    #map-col.menu-open {
+        left: 22rem;
+        bottom: 0;
+    }
+
+    #darken-map.menu-open {
+        display: none;
+        opacity: 0;
+    }
+
+    #appmap {
+        border-radius: 0.5rem 0 0 0;
+        border-left: 1px #999 solid;
+    }
+
+    #menu-open-hover-zone {
+        top: 200px;
+        right: 95%;
+        bottom: 0;
+        left: 0;
+    }
+
+    #appmap div.leaflet-control-attribution {
+        margin-bottom: 0;
+    }
+    
+}
