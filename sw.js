@@ -10,6 +10,8 @@ const resourcesToPrecache = [
 	'images/icons/globe-196x196.png',
 	'images/icons/globe-512x512.png',
 
+	'images/logos/gaz-logo.png',
+
 	'json/capital-latlng.json',
 	'json/countries_small.geo.json',
 	'json/country-currencies.json',

@@ -1,8 +1,9 @@
 <?php
 
-/*              Import libraries                */
+/*              Import utils                */
 
-function get_start_and_end_of_current_intervals() {
+function getStartAndEndOfCurrentIntervals()
+{
     /**
      * Return format:
      * array: [
@@ -14,9 +15,9 @@ function get_start_and_end_of_current_intervals() {
      */
     
     // CONST
-    $secs_in_minute = 60;
-    $secs_in_hour = 3600;
-    $secs_in_day = 86400;
+    $SECS_IN_MINUTE = 60;
+    $SECS_IN_HOUR = 3600;
+    $SECS_IN_DAY = 86400;
     
     // Get date
     $now_date = getdate();
@@ -30,19 +31,19 @@ function get_start_and_end_of_current_intervals() {
 
     // Minute
     $min_start_unix = $now_unix - $now_seconds;
-    $min_end_unix = $min_start_unix + $secs_in_minute;
+    $min_end_unix = $min_start_unix + $SECS_IN_MINUTE;
     $min_array = [$min_start_unix, $min_end_unix];
 
     // Hour
-    $now_minutes_in_secs = $now_minutes * $secs_in_minute;
+    $now_minutes_in_secs = $now_minutes * $SECS_IN_MINUTE;
     $hour_start_unix = $now_unix - $now_minutes_in_secs - $now_seconds;
-    $hour_end_unix = $hour_start_unix + $secs_in_hour;
+    $hour_end_unix = $hour_start_unix + $SECS_IN_HOUR;
     $hour_array = [$hour_start_unix, $hour_end_unix];
 
     // Day
-    $days_since_epoch = floor($now_unix / $secs_in_day);
-    $day_start_unix = $days_since_epoch * $secs_in_day;
-    $day_end_unix = $day_start_unix + $secs_in_day;
+    $days_since_epoch = floor($now_unix / $SECS_IN_DAY);
+    $day_start_unix = $days_since_epoch * $SECS_IN_DAY;
+    $day_end_unix = $day_start_unix + $SECS_IN_DAY;
     $day_array = [$day_start_unix, $day_end_unix];
 
     // Month
@@ -71,33 +72,33 @@ function get_start_and_end_of_current_intervals() {
 
 /*              Setup               */
 
-
-
 // Check params
-if (!isset($_GET['id'])) bad_request();
-if (!isset($_GET['z'])) bad_request();
-if (!isset($_GET['x'])) bad_request();
-if (!isset($_GET['y'])) bad_request();
+if (!isset($_GET['id'])) badRequest();
+if (!isset($_GET['z'])) badRequest();
+if (!isset($_GET['x'])) badRequest();
+if (!isset($_GET['y'])) badRequest();
 
 /*              Parse request               */
 $id_raw = $_GET["id"];
 $z_str = $_GET["z"];
 $x_str = $_GET["x"];
 $y_str = $_GET["y"];
+
 // Convert/cast
-$map_id = raw_to_map_id($id_raw);
+$map_id = rawToMapId($id_raw);
 $z = intval($z_str);
 $x = intval($x_str);
 $y = intval($y_str);
+
 // Data integrity check
 $xyz_strings = [$z_str, $x_str, $y_str];
 $xyz_ints = [$z, $x, $y];
-for($i=0;$i<count($xyz_ints);$i++) {
+for ($i = 0; $i < count($xyz_ints); $i++) {
     $xyz_int = $xyz_ints[$i];
     $xyz_string = $xyz_strings[$i];
-    if ($xyz_int == 0 && $xyz_string != "0") bad_request();
+    if ($xyz_int == 0 && $xyz_string != "0") badRequest();
 }
-$provider = map_id_to_provider($map_id);
+$provider = mapIdToProvider($map_id);
 // Data parsed and cast
 // Check DB
 
@@ -105,7 +106,7 @@ $provider = map_id_to_provider($map_id);
 $client_ip = "";
 if (!isset($_SERVER['REMOTE_ADDR'])) {
     // IP not found, return 429 error
-    client_spam();
+    clientSpam();
 }
 // Got IP
 $client_ip = $_SERVER['REMOTE_ADDR'];
@@ -121,43 +122,43 @@ $password = file_get_contents('../keys/sqlpass.txt');
 
 // Connection to DB
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-$conn = NULL;
+$conn = null;
 try {
     $conn = new mysqli($host_name, $user_name, $password, $database);
 } catch (\Throwable $th) {
     // SQL conn error
-    internal_server();
+    internalServer();
 }
 
-$interval_start_end_obj = get_start_and_end_of_current_intervals();
+$interval_start_end_obj = getStartAndEndOfCurrentIntervals();
 // [ min, hour, day, mon ]
 //   min = [start, end] etc
 
 if (is_null($interval_start_end_obj)) {
     // Data integrity check
     $conn->close();
-    internal_server();
+    internalServer();
 }
 
 // Check db IP tables for too many requests
 $interval_keys = ["mon", "day", "hour", "min"];
     
-$max_hits_for_interval_types = get_max_hits_for_interval_types($conn, $provider);
+$max_hits_for_interval_types = getMaxHitsForIntervalTypes($conn, $provider);
 // { mon: int, day: int, hour: int, min: int }
 
 if (is_null($max_hits_for_interval_types)) {
     // IP max allowable table not found, return 500 error
     $conn->close();
-    internal_server();
+    internalServer();
 }
 
 // Get interval values for user's IP
-$client_counts = get_user_interval_counts($conn, $provider, $client_ip);
+$client_counts = getUserIntervalCounts($conn, $provider, $client_ip);
 $intervals_to_add = [];
 $id_and_new_vals = [];
 $id_and_start_unix_to_resets = [];
 
-$too_many_requests = FALSE;
+$too_many_requests = false;
 
 // Loop through intervals and check db for too many IP
 foreach($interval_keys as $interval_type) {
@@ -195,7 +196,7 @@ foreach($interval_keys as $interval_type) {
     $interval_count = $client_count['interval_count'];
     if ($interval_count > $max) {
         // Too many requests for this interval, don't increment this interval type, but check the rest also
-        $too_many_requests = TRUE;
+        $too_many_requests = true;
         continue;
     }
     // Not spamming thsi interval, increment to new value
@@ -210,58 +211,58 @@ foreach($interval_keys as $interval_type) {
 
 // Add new rows
 if (count($intervals_to_add) > 0) {
-    add_new_rows($conn, $provider, $client_ip, $intervals_to_add);
+    addNewRows($conn, $provider, $client_ip, $intervals_to_add);
 }
 
 // Increment IDs
 if (count($id_and_new_vals) > 0) {
-    set_new_interval_counts($conn, $provider, $id_and_new_vals);
+    setNewIntervalCounts($conn, $provider, $id_and_new_vals);
 }
 
 // Reset IDs
 if (count($id_and_start_unix_to_resets) > 0) {
-    reset_interval_counts($conn, $provider, $id_and_start_unix_to_resets);
+    resetIntervalCounts($conn, $provider, $id_and_start_unix_to_resets);
 }
 
 // If spamming, exit
 if ($too_many_requests) {
     $conn->close();
-    client_spam();
+    clientSpam();
 }
 
 // If reached here, not spamming, return tile...
 
 // Check if provider allows tile caching
-$provider_allows_cache = provider_allows_caching($provider);
+$provider_allows_cache = providerAllowsCaching($provider);
 
 // If provider allows cache:
 // Check DB for recent tile
 
 // If cache tile exists & not expired, return cache tile
-$id_expiry_extension = NULL;
+$id_expiry_extension = null;
 $unix_now = time();
 $dir_path = "../../images/tiles/${provider}/${map_id}/${z}/${x}/";
-$extension = NULL;
-$ctype = _get_ctype($map_id);
+$extension = null;
+$ctype = getCtype($map_id);
 $max_age = 0;
 
-$db_id = NULL;
+$db_id = null;
 if ($provider_allows_cache) {
-    $id_expiry_extension = search_for_tile_id_and_expiry_and_extension($conn, $provider, $map_id, $z, $x, $y);
+    $id_expiry_extension = searchForTileIdAndExpiryAndExtension($conn, $provider, $map_id, $z, $x, $y);
     if (!is_null($id_expiry_extension)) {
         // Check if expiry is in the past or future...
         $expiry_unix = $id_expiry_extension['expiry_unix'];
         $extension = $id_expiry_extension['extension'];
         $db_id = $id_expiry_extension['id'];
-        $ctype = gen_ctype_from_extension($extension);
+        $ctype = genCtypeFromExtension($extension);
         if ($expiry_unix > $unix_now) {
             // If expiry is in future:
             // Fetch tile from cache
             $file_full_path = "${dir_path}${y}";
-            if ($extension !== "" && $extension !== NULL) {
+            if ($extension !== "" && $extension !== null) {
                 $file_full_path = "${file_full_path}.${extension}";
             }
-            $blob = get_file_from_storage($file_full_path);
+            $blob = getFileFromStorage($file_full_path);
             if (!is_null($blob)) {
                 // DB success
                 $conn->close();
@@ -280,29 +281,29 @@ if ($provider_allows_cache) {
 }
 
 // If cache not allowed, or tile not found, fetch new from API
-$url = get_url($map_id, $z, $x, $y);
+$url = getUrl($map_id, $z, $x, $y);
 // Call API
-$blob_and_headers = fetch_png_external_api_and_header($url);
+$blob_and_headers = fetchPngExternalApiAndHeader($url);
 // Blob
 $blob = $blob_and_headers['blob'];
 // Headers to parse for Max-Age and Ctype
 $headers = $blob_and_headers['header'];
 // Max age
-//$max_age_or_null = parse_max_age_from_header($headers);
+//$max_age_or_null = parseMaxAgeFromHeader($headers);
 $max_age_or_null = 86400;
 if (!is_null($max_age_or_null)) $max_age = $max_age_or_null;
 // Ctype
-$ctype = parse_ctype_from_header($headers);
+$ctype = parseCtypeFromHeader($headers);
 
 // Cache tile if possible
 if ($provider_allows_cache) {
-    $extension = gen_extension_from_ctype($ctype);
-    if (is_null($extension)) $extension = _get_extension($map_id);
+    $extension = genExtensionFromCtype($ctype);
+    if (is_null($extension)) $extension = getExtension($map_id);
     if (is_null($extension)) $extension = 'png';
     $extension = $conn->real_escape_string($extension);
     $file_full_path = "${dir_path}${y}.${extension}";
     // Cache allowed
-    $file_success = cache_png_to_server($blob, $dir_path, $file_full_path);
+    $file_success = cachePngToServer($blob, $dir_path, $file_full_path);
     if ($file_success) {
         // Either update row, or add new row
         $table_prefix = 'tile_expiry_';
@@ -348,7 +349,8 @@ die($blob);
 
 // Get the maximum allowable IP hits for a interval types
 // : { mon: int, day: int, hour: int, min: int }
-function get_max_hits_for_interval_types($conn, $provider) {
+function getMaxHitsForIntervalTypes($conn, $provider)
+{
     $field_names = 'interval_type, interval_max';
     $table_name = 'ip_hit_tile_max';
     $ip_hit_max_sql =
@@ -366,11 +368,11 @@ function get_max_hits_for_interval_types($conn, $provider) {
         while($row = $result->fetch_assoc()) {
             if (!isset($row['interval_type'])) {
                 // Row error
-                return NULL;
+                return null;
             }
             if (!isset($row['interval_max'])) {
                 // Row error
-                return NULL;
+                return null;
             }
             // Row data success
             $interval_type = $row['interval_type'];
@@ -382,14 +384,15 @@ function get_max_hits_for_interval_types($conn, $provider) {
         $conn->next_result();
         return $interval_type_max;
     }
-    return NULL;
+    return null;
 }
 
 
 // Check DB for user's IP to prevent spamming
 // : { interval_type: {id, interval_count}, key: { val, val }, ... ]
 // : []
-function get_user_interval_counts($conn, $provider, $client_ip) {
+function getUserIntervalCounts($conn, $provider, $client_ip)
+{
     $table_prefix = 'ip_hit_tile_';
     $table_name = $table_prefix . $provider;
 
@@ -434,14 +437,19 @@ function get_user_interval_counts($conn, $provider, $client_ip) {
         $row_obj['start_unix'] = $start_unix_int;
         $rtn_obj[$interval_type] = $row_obj;
     }
-    if ($result != FALSE && $result != TRUE) {
+    if ($result != false && $result != true) {
         $result->close();
     }
     $conn->next_result();
     return $rtn_obj;
 }
 
-function add_new_rows($conn, $provider, $client_ip, $intervals) {
+function addNewRows(
+    $conn,
+    $provider,
+    $client_ip,
+    $intervals
+) {
     $table_prefix = 'ip_hit_tile_';
     $table_name = $table_prefix . $provider;
 
@@ -473,7 +481,8 @@ function add_new_rows($conn, $provider, $client_ip, $intervals) {
     } while ($conn->next_result());
 }
 
-function set_new_interval_counts($conn, $provider, $ips_and_vals) {
+function setNewIntervalCounts($conn, $provider, $ips_and_vals)
+{
     $table_prefix = 'ip_hit_tile_';
     $table_name = $table_prefix . $provider;
 
@@ -505,7 +514,8 @@ function set_new_interval_counts($conn, $provider, $ips_and_vals) {
     } while ($conn->next_result());
 }
 
-function reset_interval_counts($conn, $provider, $id_and_start_unix_to_resets) {
+function resetIntervalCounts($conn, $provider, $id_and_start_unix_to_resets)
+{
     $table_prefix = 'ip_hit_tile_';
     $table_name = $table_prefix . $provider;
 
@@ -537,7 +547,8 @@ function reset_interval_counts($conn, $provider, $id_and_start_unix_to_resets) {
     } while ($conn->next_result());
 }
 
-function fetch_png_external_api($url) {
+function fetchPngExternalApi($url)
+{
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -547,13 +558,14 @@ function fetch_png_external_api($url) {
 
     if (!$blob) {
         // Error
-        return FALSE;
+        return false;
     }
     // Image
     return $blob;
 }
 
-function fetch_png_external_api_and_header($url) {
+function fetchPngExternalApiAndHeader($url)
+{
     function parseHeader($rawHeader) {
         $header = array();
         $lines = preg_split('/\r\n|\r|\n/', $rawHeader);
@@ -583,7 +595,7 @@ function fetch_png_external_api_and_header($url) {
 
     if (!$blob) {
         // Error
-        return FALSE;
+        return false;
     }
     // Image
     $rtn_obj = [];
@@ -592,17 +604,18 @@ function fetch_png_external_api_and_header($url) {
     return $rtn_obj;
 }
 
-function cache_png_to_server($blob, $dir_path, $file_full_path) {
-    function _create_dirs_if_needed($dir_path) {
+function cachePngToServer($blob, $dir_path, $file_full_path)
+{
+    function _createDirsIfNeeded($dir_path) {
         // Check for dir
         if (file_exists($dir_path)) {
             // File or folder found...
             if (is_dir($dir_path)) {
                 // Folder already exists
-                return TRUE;
+                return true;
             } else {
                 // Error, target folder is a file
-                return FALSE;
+                return false;
             }
         }
     
@@ -610,14 +623,14 @@ function cache_png_to_server($blob, $dir_path, $file_full_path) {
             // Dir missing: Create
             // Setup
             $permissions = 0770;
-            $recursive = TRUE;
+            $recursive = true;
             $dir_success = mkdir($dir_path, $permissions, $recursive);
             if (!$dir_success) {
                 // Error
-                return FALSE;
+                return false;
             }
         } catch (Exception $e) {
-            return FALSE;
+            return false;
         }
     
     
@@ -626,37 +639,37 @@ function cache_png_to_server($blob, $dir_path, $file_full_path) {
             // File or folder found...
             if (is_dir($dir_path)) {
                 // Now exists
-                return TRUE;
+                return true;
             } else {
                 // Error, target folder is a file
-                return FALSE;
+                return false;
             }
         }
     
         // Error if reached here
-        return FALSE;
+        return false;
     }
     // Create directory if not created
-    $dir_success = _create_dirs_if_needed($dir_path);
+    $dir_success = _createDirsIfNeeded($dir_path);
     if (!$dir_success) {
-        return FALSE;
+        return false;
     }
 
     // Write png file
     $bytes_written = file_put_contents($file_full_path, $blob);
 
-    if ($bytes_written == FALSE) {
+    if ($bytes_written == false) {
         // Error writing file
-        return FALSE;
+        return false;
     }
     // Success
-    return TRUE;
+    return true;
 }
 
 
 /*              Helper methods              */
 
-function raw_to_map_id($map_id_raw)
+function rawToMapId($map_id_raw)
 {   // Pigeon-hole incoming ID param
     switch ($map_id_raw) {
         //case 'street': 
@@ -668,29 +681,38 @@ function raw_to_map_id($map_id_raw)
         //case 'ocean':
         case 'temp':
         case 'rain':
-            return $map_id_raw; break;
+            return $map_id_raw;
+        default: 
+            badRequest();
     }
-    bad_request();
 }
 
-function map_id_to_provider($map_id)
+function mapIdToProvider($map_id)
 {   // Pigeon-hole parsed ID param
     switch ($map_id) {
-        case 'street': return 'openstreetmap'; break;
-        case 'transport': return 'thunderforest'; break;
-        case 'dark': return 'stadiamaps'; break;
+        case 'street':
+            return 'openstreetmap';
+        case 'transport':
+            return 'thunderforest';
+        case 'dark':
+            return 'stadiamaps';
         case 'sat':
         case 'ocean':
-            return 'arcgisonline'; break;
-        case 'night': return 'nasa'; break;
-        case 'topo': return 'opentopomap'; break;
+            return 'arcgisonline';
+        case 'night':
+            return 'nasa';
+        case 'topo':
+            return 'opentopomap';
         case 'temp':
-        case 'rain': return 'openweathermap'; break;
+        case 'rain':
+            return 'openweathermap';
+        default:
+            badRequest();
     }
-    bad_request();
 }
 
-function provider_allows_caching($provider) {
+function providerAllowsCaching($provider)
+{
     // do needle/haystack
     switch ($provider) {
         case 'openstreetmap':
@@ -700,12 +722,20 @@ function provider_allows_caching($provider) {
         case 'nasa':
         case 'opentopomap':
         case 'openweathermap':
-            return TRUE; break;
-        default: return FALSE;
+            return true;
+        default:
+            return false;
     }
 }
 
-function search_for_tile_id_and_expiry_and_extension($conn, $provider, $map_id, $z, $x, $y) {
+function searchForTileIdAndExpiryAndExtension(
+    $conn,
+    $provider,
+    $map_id,
+    $z,
+    $x,
+    $y
+) {
     $table_prefix = 'tile_expiry_';
     $table_name = $table_prefix . $provider;
 
@@ -736,14 +766,15 @@ function search_for_tile_id_and_expiry_and_extension($conn, $provider, $map_id, 
         $conn->next_result();
         return $rtn_obj;
     }
-    if ($result != FALSE && $result != TRUE) {
+    if ($result != false && $result != true) {
         $result->close();
     }
     $conn->next_result();
-    return NULL;
+    return null;
 }
 
-function _get_extension($map_id) {
+function getExtension($map_id)
+{
     $png = 'png';
     $jpeg = 'jpeg';
     switch ($map_id) {
@@ -759,7 +790,9 @@ function _get_extension($map_id) {
     }
     return $png;
 }
-function _get_ctype($map_id) {
+
+function getCtype($map_id)
+{
     $png = 'image/png';
     $jpeg = 'image/jpeg';
     $gzip = 'gzip';
@@ -777,7 +810,8 @@ function _get_ctype($map_id) {
     return $png;
 }
 
-function parse_ctype_from_header($header) {
+function parseCtypeFromHeader($header)
+{
     $prefix = 'image/';
     $png = "${prefix}png";
     $jpeg = "${prefix}jpeg";
@@ -793,7 +827,7 @@ function parse_ctype_from_header($header) {
                 return $content_type; break;
         }
         $prefix_pos = strpos($content_type, $prefix);
-        if ($prefix_pos !== FALSE) {
+        if ($prefix_pos !== false) {
             if ($prefix_pos === 0) {
                 $content_type_len = strlen($content_type);
                 if ($content_type_len > 12) $content_type = substr($content_type, 0, 12);
@@ -804,7 +838,8 @@ function parse_ctype_from_header($header) {
     return '';
 }
 
-function gen_ctype_from_extension($extension) {
+function genCtypeFromExtension($extension)
+{
     $prefix = 'image/';
     $png = "${prefix}png";
     $jpeg = "${prefix}jpeg";
@@ -819,7 +854,8 @@ function gen_ctype_from_extension($extension) {
     return $png;
 }
 
-function gen_extension_from_ctype($ctype) {
+function genExtensionFromCtype($ctype)
+{
     $prefix = 'image/';
     $png = "${prefix}png";
     $jpeg = "${prefix}jpeg";
@@ -831,10 +867,11 @@ function gen_extension_from_ctype($ctype) {
         case $jpg: return 'jpg'; break;
         case $gzip: return 'vector.pbf'; break;
     }
-    return NULL;
+    return null;
 }
 
-function get_file_from_storage($file_full_path) {
+function getFileFromStorage($file_full_path)
+{
     if (file_exists($file_full_path)) {
         if (!is_dir($file_full_path)) {
             // File found
@@ -842,76 +879,104 @@ function get_file_from_storage($file_full_path) {
             return $file;
         }
     }
-    return NULL;
+    return null;
 }
 
-function get_max_age($map_id) {
+function getMaxAge($map_id)
+{
     switch ($map_id) {
-        case 'street': return 165280; break;
-        case 'transport': return 21600; break;
-        case 'dark': return 43200; break;
-        case 'sat': return 86400; break;
-        case 'night': return 0; break;
-        case 'topo': return 604800; break;
-        case 'ocean': return 86400; break;
-        case 'temp': return 3600;
-        case 'rain': return 3600;
+        case 'street':
+            return 165280;
+        case 'transport':
+            return 21600;
+        case 'dark':
+            return 43200;
+        case 'sat':
+            return 86400;
+        case 'night':
+            return 0;
+        case 'topo':
+            return 604800;
+        case 'ocean':
+            return 86400;
+        case 'temp':
+            return 3600;
+        case 'rain':
+            return 3600;
+        default:
+            return 0;
     }
-    return 0;
 }
 
-function parse_max_age_from_header($header) {
-    if (!isset($header['cache-control'])) return NULL;
+function parseMaxAgeFromHeader($header)
+{
+    if (!isset($header['cache-control'])) return null;
     $cache_control = $header['cache-control'];
     $pattern = '/max-age=([0-9]+)/';
     preg_match($pattern, $$cache_control, $matches, PREG_OFFSET_CAPTURE);
-    if (!isset($matches[0])) return NULL;
-    if (!isset($matches[0][0])) return NULL;
+    if (!isset($matches[0])) return null;
+    if (!isset($matches[0][0])) return null;
     $full_string = $matches[0][0];
     $suffix = 'max-age=';
     $seconds = substr($full_string, strlen($suffix));
     return $seconds;
 }
 
-function get_url($map_id, $z, $x, $y) {
+function getUrl(
+    $map_id,
+    $z,
+    $x,
+    $y
+) {
     $api_key = ""; 
     switch ($map_id) {
-        case 'street': return "https://tile.openstreetmap.org/${z}/${x}/${y}.png"; break;
-        case 'transport': $api_key = file_get_contents('../keys/thunderforest.txt');
-            return "https://tile.thunderforest.com/transport/${z}/${x}/${y}.png?apikey=${api_key}"; break;
-        case 'dark': $api_key = file_get_contents('../keys/stadiamaps.txt');
-            return "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/${z}/${x}/${y}.png?api_key=${api_key}"; break;
-        case 'sat': return "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}"; break;
-        case 'night': return "https://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_CityLights_2012/default//GoogleMapsCompatible_Level8/${z}/${y}/${x}.jpg"; break;
-        case 'topo': return "https://tile.opentopomap.org/${z}/${x}/${y}.png"; break;
-        case 'ocean': return "https://server.arcgisonline.com/ArcGIS/rest/services/Ocean_Basemap/MapServer/tile/${z}/${y}/${x}"; break;
-        case 'temp': $api_key = file_get_contents('../keys/openweathermap.txt');
-            return "https://tile.openweathermap.org/map/temp_new/${z}/${x}/${y}.png?appid=${api_key}"; break;
-        case 'rain': $api_key = file_get_contents('../keys/openweathermap.txt');
-            return "https://tile.openweathermap.org/map/precipitation_new/${z}/${x}/${y}.png?appid=${api_key}"; break;
+        case 'street':
+            return "https://tile.openstreetmap.org/${z}/${x}/${y}.png";
+        case 'transport':
+            $api_key = file_get_contents('../keys/thunderforest.txt');
+            return "https://tile.thunderforest.com/transport/${z}/${x}/${y}.png?apikey=${api_key}";
+        case 'dark':
+            $api_key = file_get_contents('../keys/stadiamaps.txt');
+            return "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/${z}/${x}/${y}.png?api_key=${api_key}";
+        case 'sat':
+            return "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}";
+        case 'night':
+            return "https://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_CityLights_2012/default//GoogleMapsCompatible_Level8/${z}/${y}/${x}.jpg";
+        case 'topo':
+            return "https://tile.opentopomap.org/${z}/${x}/${y}.png";
+        case 'ocean':
+            return "https://server.arcgisonline.com/ArcGIS/rest/services/Ocean_Basemap/MapServer/tile/${z}/${y}/${x}";
+        case 'temp':
+            $api_key = file_get_contents('../keys/openweathermap.txt');
+            return "https://tile.openweathermap.org/map/temp_new/${z}/${x}/${y}.png?appid=${api_key}";
+        case 'rain':
+            $api_key = file_get_contents('../keys/openweathermap.txt');
+            return "https://tile.openweathermap.org/map/precipitation_new/${z}/${x}/${y}.png?appid=${api_key}";
+        default:
+            return "";
     }
-    return "";
 }
 
 
 /* 2xx Success */
 
 /* 4xx Client error */
-function bad_request() {
+function badRequest()
+{
     $code = 400;
     http_response_code($code);
     die();
 }
-function client_spam() {
+function clientSpam()
+{
     $code = 429;
     http_response_code($code);
     die();
 }
 /* 5xx Server error */
-function internal_server() {
+function internalServer()
+{
     $code = 500;
     http_response_code($code);
     die();
 }
-
-?>
