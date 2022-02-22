@@ -15,11 +15,9 @@ function getStartAndEndOfCurrentIntervals() {
      */
     
     // CONST
-    $secs_in_minute = 60;
-    //$secs_in_hour = $secs_in_minute * 60; // 3,600
-    $secs_in_hour = 3600;
-    //$secs_in_day = $secs_in_hour * 24; // 86,400
-    $secs_in_day = 86400;
+    $SECS_IN_MINUTE = 60;
+    $SECS_IN_HOUR = 3600;
+    $SECS_IN_DAY = 86400;
     
     // Get date
     $now_date = getdate();
@@ -33,19 +31,19 @@ function getStartAndEndOfCurrentIntervals() {
 
     // Minute
     $min_start_unix = $now_unix - $now_seconds;
-    $min_end_unix = $min_start_unix + $secs_in_minute;
+    $min_end_unix = $min_start_unix + $SECS_IN_MINUTE;
     $min_array = [$min_start_unix, $min_end_unix];
 
     // Hour
-    $now_minutes_in_secs = $now_minutes * $secs_in_minute;
+    $now_minutes_in_secs = $now_minutes * $SECS_IN_MINUTE;
     $hour_start_unix = $now_unix - $now_minutes_in_secs - $now_seconds;
-    $hour_end_unix = $hour_start_unix + $secs_in_hour;
+    $hour_end_unix = $hour_start_unix + $SECS_IN_HOUR;
     $hour_array = [$hour_start_unix, $hour_end_unix];
 
     // Day
-    $days_since_epoch = floor($now_unix / $secs_in_day);
-    $day_start_unix = $days_since_epoch * $secs_in_day;
-    $day_end_unix = $day_start_unix + $secs_in_day;
+    $days_since_epoch = floor($now_unix / $SECS_IN_DAY);
+    $day_start_unix = $days_since_epoch * $SECS_IN_DAY;
+    $day_end_unix = $day_start_unix + $SECS_IN_DAY;
     $day_array = [$day_start_unix, $day_end_unix];
 
     // Month
