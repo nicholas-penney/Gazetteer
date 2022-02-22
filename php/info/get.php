@@ -3,7 +3,8 @@
 /*              Import utils                */
 
 
-function getStartAndEndOfCurrentIntervals() {
+function getStartAndEndOfCurrentIntervals()
+{
     /**
      * Return format:
      * array: [
@@ -390,7 +391,7 @@ if (count($chs) > 0) {
 }
 
 // Handle API responses
-for ($i=0; $i<count($get_ext); $i++) {
+for ($i = 0; $i < count($get_ext); $i++) {
     // Get loop vals
     $info_type = $get_ext[$i];
     $api_res = $api_responses[$i];
@@ -418,7 +419,8 @@ die();
 
 // Output results in JSON format back to user
 // : VOID
-function echoResJson() {
+function echoResJson()
+{
     global $result_arr;
     $json = json_encode($result_arr, JSON_UNESCAPED_UNICODE);
     // Zip
@@ -440,7 +442,8 @@ function echoResJson() {
 
 // Check if ISO2 code is valid, and return corresponding country name
 // : string || null || false
-function iso2ToCountryName($iso2) {
+function iso2ToCountryName($iso2)
+{
     $isos_json_string = file_get_contents('../../json/country-isos.json');
     $country_names_string = file_get_contents('../../json/countryarray.json');
     // Parse JSON
@@ -470,7 +473,8 @@ function iso2ToCountryName($iso2) {
 
 // Return only valid info request strings
 // : [string]
-function infoReqsValid($req_info_array) {
+function infoReqsValid($req_info_array)
+{
     $valid_info_types = [];
     $haystack = ["wiki", "weather", "financial", "people", "currency", "population"];
 
@@ -487,7 +491,8 @@ function infoReqsValid($req_info_array) {
 
 // Get the maximum allowable IP hits for a interval types
 // : { mon: int, day: int, hour: int, min: int }
-function getMaxHitsForIntervalTypes($conn) {
+function getMaxHitsForIntervalTypes($conn)
+{
     $field_names = 'interval_type, interval_max';
     $table_name = 'ip_hit_info_max';
     $ip_hit_max_sql =
@@ -526,7 +531,13 @@ function getMaxHitsForIntervalTypes($conn) {
 
 // Check DB for user's IP to prevent spamming
 // : BOOLEAN
-function isUserSpammingInterval($conn, $interval_type_key, $max_for_interval, $start_unix, $client_ip) {
+function isUserSpammingInterval(
+    $conn,
+    $interval_type_key,
+    $max_for_interval,
+    $start_unix,
+    $client_ip
+) {
     // Clear old data first
     $table_name = 'ip_hit_info';
 
@@ -599,7 +610,8 @@ function isUserSpammingInterval($conn, $interval_type_key, $max_for_interval, $s
 
 // Fetch Wiki data from DB
 // : { ... } || null
-function getWikiDb($iso2) {
+function getWikiDb($iso2)
+{
     // Not yet available
     // Use Geonames external API
     return null;
@@ -607,14 +619,16 @@ function getWikiDb($iso2) {
 
 // Fetch Weather data from DB
 // : { ... } || null
-function getWeatherDb($iso2) {
+function getWeatherDb($iso2)
+{
     // Implement cache later
     return null;
 }
 
 // Fetch Financial data from DB
 // : { ... } || null
-function getFinancialDb($iso2, $conn) {
+function getFinancialDb($iso2, $conn)
+{
     $iso = $iso2;
     // Get GDP
     $table_name = 'people_data';
@@ -637,7 +651,8 @@ function getFinancialDb($iso2, $conn) {
 
 // Fetch People data from DB
 // : { ... } || null
-function getPeopleDb($iso, $conn) {
+function getPeopleDb($iso, $conn)
+{
     // Get GDP
     $table_name = 'people_data';
 
@@ -700,7 +715,7 @@ function getPeopleDb($iso, $conn) {
         $row = $result->fetch_assoc();
         $rtn_obj = [];
         // Unpack to JS camelCase
-        for ($i=0;$i<count($fields);$i++) {
+        for ($i = 0; $i < count($fields); $i++) {
             $field = $fields[$i];
             $rtn_key = $rtn_keys[$i];
             // Skip missing response keys
@@ -733,7 +748,8 @@ function getPeopleDb($iso, $conn) {
 
 // Fetch currency data from DB
 // : { current: {r: rateFloat, t: unixInt}, days: [ {t,l,o,c,h}, {...}, ... ] } || null
-function getCurrencyDb($currency_code, $conn) {
+function getCurrencyDb($currency_code, $conn)
+{
     $currency_code_escaped = $conn->real_escape_string($currency_code);
     $current_time = time();
     $current_unix_day = floor($current_time / 86400);
@@ -802,7 +818,8 @@ function getCurrencyDb($currency_code, $conn) {
     return [];
 }
 
-function getPopulationDb($iso2, $conn) {
+function getPopulationDb($iso2, $conn)
+{
     // Generate SQL query
     $field_names = 'population';
     $table_name = 'people_data';
@@ -829,7 +846,8 @@ function getPopulationDb($iso2, $conn) {
 /*              Fetch from External API             */
 
 
-function genWikiUrl($country_name) {
+function genWikiUrl($country_name)
+{
     $api_key = file_get_contents('../keys/geonames.txt');
     $country_url_escape = urlencode($country_name);
 
@@ -840,8 +858,9 @@ function genWikiUrl($country_name) {
 // Fetch Wiki From External API
 // : [ {sum, w_url, t_url, (w_flag, t_flag)}, ... ] || []
 // Parse API response string, save to global rtn var
-function parseWikiExternal($response) {
-    function _string_clean($string) {
+function parseWikiExternal($response)
+{
+    function _stringClean($string) {
         $string = str_replace(['-', '_'], '', $string); // Deletes all hyphens and underscores
         return preg_replace('/[^A-Za-z0-9\-]/', '', $string); // Removes special chars. 
     }
@@ -939,14 +958,14 @@ function parseWikiExternal($response) {
         }
         $url_end_lower = strtolower($url_end);
         $country_lower = strtolower($country_name);
-        $url_end_clean = _string_clean($url_end_lower);
-        $country_clean = _string_clean($country_lower);
+        $url_end_clean = _stringClean($url_end_lower);
+        $country_clean = _stringClean($country_lower);
         $url_end_matches_country_name = $url_end_clean == $country_clean;
 
         if ($url_end_matches_country_name == false) {
             // Edge cases like "the_bahamas" => "bahamas"
             $url_end_lower_no_the = str_replace(["the-", "the_"], "", $url_end_lower);
-            $url_end_lower_no_the_clean = _string_clean($url_end_lower_no_the);
+            $url_end_lower_no_the_clean = _stringClean($url_end_lower_no_the);
             $url_end_matches_country_name = $url_end_lower_no_the_clean == $country_clean;
 
             if ($url_end_matches_country_name == false) {
@@ -1001,12 +1020,13 @@ function parseWikiExternal($response) {
 
 // Fetch Weather From External API
 // : [ {}, ... ] || []
-function getWeatherExternal($iso2) {
+function getWeatherExternal($iso2)
+{
     // Get lat/lng of Capital to use
     // If no capital, use top populated city... or get country lat/lng from another table (rest countries?) to use
     /* Methods */
-    function getCapitalWeather($iso2, $getOneCall) {
-        function _parse_weather_one_call($response_array) {
+    function _getCapitalWeather($iso2) {
+        function _parseWeatherOneCall($response_array) {
             $rtn_obj = [];
             
             // Current
@@ -1499,10 +1519,8 @@ function getWeatherExternal($iso2) {
         if ($api_key == "") return [];
 
         // One Call vs Current
-        $url = "https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${api_key}&units=metric";
-        if ($getOneCall) {
-            $url = "https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&exclude=minutely&appid=${api_key}&units=metric";
-        }
+        //$url = "https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${api_key}&units=metric";
+        $url = "https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&exclude=minutely&appid=${api_key}&units=metric";
 
         //  cURL
         $ch = curl_init();
@@ -1514,30 +1532,29 @@ function getWeatherExternal($iso2) {
         $response_array = json_decode($response, true);
 
         // Parse response
-        $parsed_response = null;
-        if ($getOneCall) {
-            $parsed_response = _parse_weather_one_call($response_array);
-        }
+        $parsed_response = _parseWeatherOneCall($response_array);
         // Return object
         return $parsed_response;
     }
     
-
     // Try capital
-    $capital_weather = getCapitalWeather($iso2, true);
+    $capital_weather = _getCapitalWeather($iso2);
     if (count($capital_weather) > 0) return $capital_weather;
 
+    // Error
     return [];
 }
 
 // Fetch Financial From External API
 // : [ {}, ... ] || []
-function getFinancialExternal($iso2) {
+function getFinancialExternal($iso2)
+{
     // No external API currently for consideration
     return null;
 }
 
-function genPeopleUrl($iso2) {
+function genPeopleUrl($iso2)
+{
     $req_keys = ['currencies', 'idd', 'area', 'population', 'flags'];
     $fields = implode(',', $req_keys);
     $url = "https://restcountries.com/v3.1/alpha/${iso2}?fields=${fields}";
@@ -1546,7 +1563,8 @@ function genPeopleUrl($iso2) {
 
 // Fetch OtherData From External API
 // : [ {}, ... ] || []
-function parsePeopleExternal($response, $conn, $iso2) {
+function parsePeopleExternal($response, $conn, $iso2)
+{
     global $res_data_objs;
 
     $response_array = json_decode($response, true);
@@ -1635,7 +1653,7 @@ function parsePeopleExternal($response, $conn, $iso2) {
 
     // Update DB
     $sql_fields = [];
-    for ($i=0; $i<count($db_keys); $i++) {
+    for ($i = 0; $i < count($db_keys); $i++) {
         $db_key = $db_keys[$i];
         $db_val = $db_vals[$i];
         $sql_field = "${db_key} = ${db_val}";
@@ -1651,16 +1669,19 @@ function parsePeopleExternal($response, $conn, $iso2) {
 }
 
 /* 4xx Client error */
-function badRequest() {
+function badRequest()
+{
     $code = 400;
     http_response_code($code);
 }
-function clientSpam() {
+function clientSpam()
+{
     $code = 429;
     http_response_code($code);
 }
 /* 5xx Server error */
-function internalServer() {
+function internalServer()
+{
     $code = 500;
     http_response_code($code);
 }
