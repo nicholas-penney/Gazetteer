@@ -326,7 +326,8 @@ foreach ($validated_info_array as $info_type) {
             }
             $res_data_objs[$info_type] = getPopulationDb($iso2, $conn);
             break;
-        default: break;
+        default:
+            break;
     }
 }
 // Should have all DB data, check for need for External API
@@ -344,7 +345,9 @@ foreach ($get_ext as $info_type) {
             $people_url = genPeopleUrl($iso2);
             array_push($urls, $people_url);
             break;
-        default: array_push($urls, null); break;
+        default:
+            array_push($urls, null);
+            break;
     }
 }
 
@@ -399,9 +402,14 @@ for ($i = 0; $i < count($get_ext); $i++) {
     if (is_null($api_res)) continue;
     // Handle each type
     switch ($info_type) {
-        case 'wiki': parseWikiExternal($api_res); break;
-        case 'people': parsePeopleExternal($api_res, $conn, $iso2); break;
-        default: break;
+        case 'wiki':
+            parseWikiExternal($api_res);
+            break;
+        case 'people':
+            parsePeopleExternal($api_res, $conn, $iso2);
+            break;
+        default:
+            break;
     }
 }
 // Should have all data, either from DB or External API
@@ -726,7 +734,9 @@ function getPeopleDb($iso, $conn)
             // Cast
             $cast = $data_types[$i];
             switch ($cast) {
-                case 'i': $rtn_val = intval($rtn_val);
+                case 'i':
+                    $rtn_val = intval($rtn_val);
+                    break;
             }
             // return
             $rtn_obj[$rtn_key] = $rtn_val;
